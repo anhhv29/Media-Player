@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -69,21 +70,21 @@ public class MainActivity extends AppCompatActivity {
             startTime = mediaPlayer.getCurrentPosition();
             Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
             if (oneTimeOnly == 0) {
+                Log.d("check0","0: "+finalTime);
                 seekBar.setMax((int) finalTime);
                 oneTimeOnly = 1;
             }
-
-            tvAll.setText(String.format("%d min, %d sec",
-                    TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
-                    TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                    finalTime))));
-
             tvCurrent.setText(String.format("%d min, %d sec",
                     TimeUnit.MILLISECONDS.toMinutes((long) startTime),
                     TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
                                     startTime))));
+            tvAll.setText(String.format("%d min, %d sec",
+                    TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
+                    TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
+                                    finalTime))));
+            Log.d("check1","1: "+startTime);
             seekBar.setProgress((int) startTime);
             myHandler.postDelayed(UpdateSongTime, 100);
         });
@@ -131,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.
                                     toMinutes((long) startTime)))
             );
+            Log.d("check","2: "+startTime);
             seekBar.setProgress((int) startTime);
             myHandler.postDelayed(this, 100);
         }
