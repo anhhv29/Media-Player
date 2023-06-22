@@ -26,7 +26,9 @@ public class MainActivity extends AppCompatActivity {
     int forwardTime = 15000;
     int backwardTime = 15000;
     int oneTimeOnly = 0;
-    int unit = 1;
+    String url = "";
+    int currentPosition = 1;
+    Boolean callSound = false;
 
     @SuppressLint({"MissingInflatedId", "DefaultLocale"})
     @Override
@@ -49,44 +51,31 @@ public class MainActivity extends AppCompatActivity {
         tvAll = findViewById(R.id.tvAll);
 
         mediaPlayer = new MediaPlayer();
-        String url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + unit + ".mp3";
 
+        url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + currentPosition + ".mp3";
         try {
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(mp -> Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show());
+            mediaPlayer.setOnPreparedListener(mp -> {
+                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                callSound = true;
+            });
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
                 Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
                 return false;
             });
-            mediaPlayer.setOnCompletionListener(mp -> Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         ivPlay.setOnClickListener(v -> {
-            mediaPlayer.start();
-            finalTime = mediaPlayer.getDuration();
-            startTime = mediaPlayer.getCurrentPosition();
             Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
-            if (oneTimeOnly == 0) {
-                Log.d("check0","0: "+finalTime);
-                seekBar.setMax((int) finalTime);
-                oneTimeOnly = 1;
+            if (callSound) {
+                mediaPlayer.start();
+                checkTime();
+            } else {
+                Toast.makeText(getApplicationContext(), "Waiting", Toast.LENGTH_SHORT).show();
             }
-            tvCurrent.setText(String.format("%d min, %d sec",
-                    TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                    TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                    startTime))));
-            tvAll.setText(String.format("%d min, %d sec",
-                    TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
-                    TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                    finalTime))));
-            Log.d("check1","1: "+startTime);
-            seekBar.setProgress((int) startTime);
-            myHandler.postDelayed(UpdateSongTime, 100);
         });
 
         ivPause.setOnClickListener(v -> {
@@ -97,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         ivClose.setOnClickListener(v -> {
             mediaPlayer.stop();
             mediaPlayer.prepareAsync();
+//            mediaPlayer.release();
         });
 
         ivNext15.setOnClickListener(v -> {
@@ -120,6 +110,67 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Cannot jump backward 15 seconds", Toast.LENGTH_SHORT).show();
             }
         });
+
+        ivSkipNext.setOnClickListener(v -> {
+            currentPosition = currentPosition + 1;
+            if (currentPosition >= 17) {
+                currentPosition = 1;
+            }
+            playNextBack();
+        });
+
+        ivSkipPrev.setOnClickListener(v -> {
+            currentPosition = currentPosition - 1;
+            if (currentPosition < 1) {
+                currentPosition = 17;
+            }
+            playNextBack();
+        });
+    }
+
+    private void playNextBack() {
+        url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + currentPosition + ".mp3";
+        try {
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(url);
+            mediaPlayer.prepare();
+            mediaPlayer.setOnPreparedListener(mp -> {
+                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                mediaPlayer.start();
+                checkTime();
+            });
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
+                return false;
+            });
+//            mediaPlayer.setOnCompletionListener(mp -> Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void checkTime() {
+        finalTime = mediaPlayer.getDuration();
+        startTime = mediaPlayer.getCurrentPosition();
+        if (oneTimeOnly == 0) {
+            Log.d("check0", "0: " + finalTime);
+            seekBar.setMax((int) finalTime);
+            oneTimeOnly = 1;
+        }
+        tvCurrent.setText(String.format("%d min, %d sec",
+                TimeUnit.MILLISECONDS.toMinutes((long) startTime),
+                TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
+                                startTime))));
+        tvAll.setText(String.format("%d min, %d sec",
+                TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
+                TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
+                                finalTime))));
+        Log.d("check1", "1: " + startTime);
+        seekBar.setProgress((int) startTime);
+        myHandler.postDelayed(UpdateSongTime, 100);
     }
 
     private final Runnable UpdateSongTime = new Runnable() {
@@ -132,9 +183,9 @@ public class MainActivity extends AppCompatActivity {
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.
                                     toMinutes((long) startTime)))
             );
-            Log.d("check","2: "+startTime);
+            Log.d("check", "2: " + startTime);
             seekBar.setProgress((int) startTime);
-            myHandler.postDelayed(this, 100);
+            myHandler.postDelayed(this, 1000);
         }
     };
 }
