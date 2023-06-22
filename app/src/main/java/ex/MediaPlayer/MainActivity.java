@@ -53,16 +53,21 @@ public class MainActivity extends AppCompatActivity {
         try {
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(mp -> Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show());
+            mediaPlayer.setOnPreparedListener(mp -> Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show());
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
+                return false;
+            });
+            mediaPlayer.setOnCompletionListener(mp -> Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         ivPlay.setOnClickListener(v -> {
-            Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
             mediaPlayer.start();
             finalTime = mediaPlayer.getDuration();
             startTime = mediaPlayer.getCurrentPosition();
+            Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
             if (oneTimeOnly == 0) {
                 seekBar.setMax((int) finalTime);
                 oneTimeOnly = 1;
