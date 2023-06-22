@@ -68,13 +68,13 @@ public class MainActivity extends AppCompatActivity {
                 oneTimeOnly = 1;
             }
 
-            tvCurrent.setText(String.format("%d min, %d sec",
+            tvAll.setText(String.format("%d min, %d sec",
                     TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
                     TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                    startTime))));
+                                    finalTime))));
 
-            tvAll.setText(String.format("%d min, %d sec",
+            tvCurrent.setText(String.format("%d min, %d sec",
                     TimeUnit.MILLISECONDS.toMinutes((long) startTime),
                     TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
