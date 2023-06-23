@@ -70,12 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
         ivPlay.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
-            if (callSound) {
-                mediaPlayer.start();
-                checkTime();
-            } else {
-                Toast.makeText(getApplicationContext(), "Waiting", Toast.LENGTH_SHORT).show();
-            }
+            playMedia();
         });
 
         ivPause.setOnClickListener(v -> {
@@ -84,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ivClose.setOnClickListener(v -> {
+            callSound = false;
             mediaPlayer.stop();
             mediaPlayer.prepareAsync();
 //            mediaPlayer.release();
@@ -117,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 currentPosition = 1;
             }
             playNextBack();
+            playMedia();
         });
 
         ivSkipPrev.setOnClickListener(v -> {
@@ -125,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 currentPosition = 17;
             }
             playNextBack();
+            playMedia();
         });
     }
 
@@ -136,8 +134,7 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.prepare();
             mediaPlayer.setOnPreparedListener(mp -> {
                 Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                mediaPlayer.start();
-                checkTime();
+                callSound = true;
             });
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
                 Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
@@ -146,6 +143,15 @@ public class MainActivity extends AppCompatActivity {
 //            mediaPlayer.setOnCompletionListener(mp -> Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void playMedia() {
+        if (callSound) {
+            mediaPlayer.start();
+            checkTime();
+        } else {
+            Toast.makeText(getApplicationContext(), "Waiting", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -158,31 +164,18 @@ public class MainActivity extends AppCompatActivity {
             seekBar.setMax((int) finalTime);
             oneTimeOnly = 1;
         }
-        tvCurrent.setText(String.format("%d min, %d sec",
-                TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                startTime))));
-        tvAll.setText(String.format("%d min, %d sec",
-                TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
-                TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                finalTime))));
+        tvCurrent.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime), TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) startTime))));
+        tvAll.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) finalTime), TimeUnit.MILLISECONDS.toSeconds((long) finalTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) finalTime))));
         Log.d("check1", "1: " + startTime);
         seekBar.setProgress((int) startTime);
-        myHandler.postDelayed(UpdateSongTime, 100);
+        myHandler.postDelayed(UpdateSongTime, 1000);
     }
 
     private final Runnable UpdateSongTime = new Runnable() {
         @SuppressLint("DefaultLocale")
         public void run() {
             startTime = mediaPlayer.getCurrentPosition();
-            tvCurrent.setText(String.format("%d min, %d sec",
-                    TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                    TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.
-                                    toMinutes((long) startTime)))
-            );
+            tvCurrent.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime), TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) startTime))));
             Log.d("check", "2: " + startTime);
             seekBar.setProgress((int) startTime);
             myHandler.postDelayed(this, 1000);
