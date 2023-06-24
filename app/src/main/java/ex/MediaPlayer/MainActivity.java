@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
         url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + currentPosition + ".mp3";
         try {
             mediaPlayer.setDataSource(url);
-            mediaPlayer.prepareAsync();
+            mediaPlayer.prepare();
+//            mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(mp -> {
                 Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
                 callSound = true;
@@ -70,6 +71,11 @@ public class MainActivity extends AppCompatActivity {
 
         ivPlay.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
+//            try {
+//                mediaPlayer.prepare();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
             playMedia();
         });
 
@@ -79,10 +85,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ivClose.setOnClickListener(v -> {
-            callSound = false;
             mediaPlayer.stop();
             mediaPlayer.prepareAsync();
-//            mediaPlayer.release();
         });
 
         ivNext15.setOnClickListener(v -> {
