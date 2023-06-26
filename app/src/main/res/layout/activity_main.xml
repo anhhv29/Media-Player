@@ -104,12 +104,28 @@
             app:srcCompat="@drawable/ic_speed" />
 
         <ImageView
+            android:id="@+id/ivLoop"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:srcCompat="@drawable/ic_loop_player" />
+
+        <ImageView
             android:id="@+id/ivRepeat"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             app:srcCompat="@drawable/ic_repeat" />
+
+        <ImageView
+            android:id="@+id/ivStopRepeat"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:srcCompat="@drawable/ic_stop_repeat" />
 
         <ImageView
             android:id="@+id/ivClose"

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivRepeat, ivClose;
+    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoop, ivRepeat, ivStopRepeat, ivClose;
     SeekBar seekBar;
     TextView tvCurrent, tvAll;
     double startTime = 0;
@@ -29,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
     String url = "";
     int currentPosition = 1;
     Boolean callSound = false;
+    Boolean isComplete = false;
+    int checkLoop = 3;
+    final int LOOP_ONE = 1;
+    final int LOOP_ALL = 2;
+    final int STOP_LOOP = 3;
 
     @SuppressLint({"MissingInflatedId", "DefaultLocale"})
     @Override
@@ -44,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
         ivNext15 = findViewById(R.id.ivNext15);
         ivSkipNext = findViewById(R.id.ivSkipNext);
         ivSpeed = findViewById(R.id.ivSpeed);
+        ivLoop = findViewById(R.id.ivLoop);
         ivRepeat = findViewById(R.id.ivRepeat);
+        ivStopRepeat = findViewById(R.id.ivStopRepeat);
         ivClose = findViewById(R.id.ivClose);
         seekBar = findViewById(R.id.seekBar);
         tvCurrent = findViewById(R.id.tvCurrent);
@@ -56,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
         try {
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepare();
-//            mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(mp -> {
                 Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
                 callSound = true;
@@ -65,17 +71,17 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
                 return false;
             });
+            mediaPlayer.setOnCompletionListener(mp -> {
+                Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show();
+                isComplete = true;
+                loopMedia();
+            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         ivPlay.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
-//            try {
-//                mediaPlayer.prepare();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
             playMedia();
         });
 
@@ -87,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         ivClose.setOnClickListener(v -> {
             mediaPlayer.stop();
             mediaPlayer.prepareAsync();
+//            finish();
         });
 
         ivNext15.setOnClickListener(v -> {
@@ -112,12 +119,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ivSkipNext.setOnClickListener(v -> {
-            currentPosition = currentPosition + 1;
-            if (currentPosition >= 17) {
-                currentPosition = 1;
-            }
-            playNextBack();
-            playMedia();
+            loopMedia();
         });
 
         ivSkipPrev.setOnClickListener(v -> {
@@ -128,6 +130,24 @@ public class MainActivity extends AppCompatActivity {
             playNextBack();
             playMedia();
         });
+
+        ivLoop.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Loop One", Toast.LENGTH_SHORT).show();
+            checkLoop = LOOP_ONE;
+            mediaPlayer.setLooping(true);
+        });
+
+        ivStopRepeat.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Stop Loop", Toast.LENGTH_SHORT).show();
+            checkLoop = STOP_LOOP;
+            mediaPlayer.setLooping(false);
+        });
+
+        ivRepeat.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Repeat", Toast.LENGTH_SHORT).show();
+            checkLoop = LOOP_ALL;
+            mediaPlayer.setLooping(false);
+        });
     }
 
     private void playNextBack() {
@@ -136,15 +156,6 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.reset();
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepare();
-            mediaPlayer.setOnPreparedListener(mp -> {
-                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                callSound = true;
-            });
-            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
-                return false;
-            });
-//            mediaPlayer.setOnCompletionListener(mp -> Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -185,4 +196,28 @@ public class MainActivity extends AppCompatActivity {
             myHandler.postDelayed(this, 1000);
         }
     };
+
+    private void loopMedia() {
+        Log.d("checkLoop", checkLoop + "");
+        switch (checkLoop) {
+            case LOOP_ALL:
+                currentPosition = currentPosition + 1;
+                if (currentPosition >= 17) {
+                    currentPosition = 1;
+                }
+                playNextBack();
+                playMedia();
+                break;
+            case STOP_LOOP:
+                currentPosition = currentPosition + 1;
+                if (currentPosition >= 17) {
+                    return;
+                }
+                playNextBack();
+                playMedia();
+                break;
+            default:
+                break;
+        }
+    }
 }
