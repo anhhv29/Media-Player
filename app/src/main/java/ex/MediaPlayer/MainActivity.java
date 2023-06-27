@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     int currentPosition = 1;
     Boolean callSound = false;
     Boolean isComplete = false;
-    int checkLoop = 0;
+    int checkLoop = 3;
     final int LOOP_ONE = 1;
     final int LOOP_ALL = 2;
     final int STOP_LOOP = 3;
@@ -153,6 +153,12 @@ public class MainActivity extends AppCompatActivity {
             checkLoop = LOOP_ALL;
             mediaPlayer.setLooping(false);
         });
+
+        ivSpeed.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Set Speed 2x", Toast.LENGTH_SHORT).show();
+            float speed = 2.0f;
+            mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+        });
     }
 
     private void playNextBack() {
@@ -206,23 +212,15 @@ public class MainActivity extends AppCompatActivity {
         Log.d("checkLoop", checkLoop + "");
         switch (checkLoop) {
             case LOOP_ALL:
+                mediaPlayer.setLooping(false);
                 currentPosition = currentPosition + 1;
                 if (currentPosition >= 17) {
                     currentPosition = 1;
                 }
-                mediaPlayer.setLooping(false);
                 playNextBack();
                 playMedia();
                 break;
-            case STOP_LOOP:
-                currentPosition = currentPosition + 1;
-                if (currentPosition >= 17) {
-                    return;
-                }
-                mediaPlayer.setLooping(false);
-                playNextBack();
-                playMedia();
-                break;
+
             case LOOP_ONE:
                 mediaPlayer.setLooping(true);
                 playNextBack();
@@ -230,6 +228,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 mediaPlayer.setLooping(false);
+                currentPosition = currentPosition + 1;
+                if (currentPosition >= 17) {
+                    return;
+                }
+                playNextBack();
+                playMedia();
                 break;
         }
     }
