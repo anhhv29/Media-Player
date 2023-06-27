@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     int currentPosition = 1;
     Boolean callSound = false;
     Boolean isComplete = false;
-    int checkLoop = 3;
+    int checkLoop = 0;
     final int LOOP_ONE = 1;
     final int LOOP_ALL = 2;
     final int STOP_LOOP = 3;
@@ -119,7 +119,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ivSkipNext.setOnClickListener(v -> {
-            loopMedia();
+            currentPosition = currentPosition + 1;
+            if (currentPosition >= 17) {
+                currentPosition = 1;
+            }
+            playNextBack();
+            playMedia();
         });
 
         ivSkipPrev.setOnClickListener(v -> {
@@ -144,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ivRepeat.setOnClickListener(v -> {
-            Toast.makeText(getApplicationContext(), "Repeat", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Loop All", Toast.LENGTH_SHORT).show();
             checkLoop = LOOP_ALL;
             mediaPlayer.setLooping(false);
         });
@@ -205,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
                 if (currentPosition >= 17) {
                     currentPosition = 1;
                 }
+                mediaPlayer.setLooping(false);
                 playNextBack();
                 playMedia();
                 break;
@@ -213,10 +219,17 @@ public class MainActivity extends AppCompatActivity {
                 if (currentPosition >= 17) {
                     return;
                 }
+                mediaPlayer.setLooping(false);
+                playNextBack();
+                playMedia();
+                break;
+            case LOOP_ONE:
+                mediaPlayer.setLooping(true);
                 playNextBack();
                 playMedia();
                 break;
             default:
+                mediaPlayer.setLooping(false);
                 break;
         }
     }
