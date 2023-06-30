@@ -25,6 +25,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <activity
+            android:name=".PlayServiceActivity"
+            android:exported="true" />
+
+        <service
+            android:name=".AudioService"
+            android:enabled="true"
+            android:exported="true"
+            android:stopWithTask="true" />
+    </application>
 </manifest>

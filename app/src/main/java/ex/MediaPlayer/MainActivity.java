@@ -1,6 +1,7 @@
 package ex.MediaPlayer;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoop, ivRepeat, ivStopRepeat, ivClose;
+    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop, ivPlayService;
     SeekBar seekBar;
     TextView tvCurrent, tvAll;
     double startTime = 0;
@@ -49,35 +50,37 @@ public class MainActivity extends AppCompatActivity {
         ivNext15 = findViewById(R.id.ivNext15);
         ivSkipNext = findViewById(R.id.ivSkipNext);
         ivSpeed = findViewById(R.id.ivSpeed);
-        ivLoop = findViewById(R.id.ivLoop);
-        ivRepeat = findViewById(R.id.ivRepeat);
-        ivStopRepeat = findViewById(R.id.ivStopRepeat);
-        ivClose = findViewById(R.id.ivClose);
+        ivLoopOne = findViewById(R.id.ivLoopOne);
+        ivLoopAll = findViewById(R.id.ivLoopAll);
+        ivStopLoop = findViewById(R.id.ivStopLoop);
+        ivStop = findViewById(R.id.ivStop);
         seekBar = findViewById(R.id.seekBar);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvAll = findViewById(R.id.tvAll);
+        ivPlayService = findViewById(R.id.ivPlayService);
 
-        mediaPlayer = new MediaPlayer();
-
-        url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + currentPosition + ".mp3";
-        try {
-            mediaPlayer.setDataSource(url);
-            mediaPlayer.prepare();
-            mediaPlayer.setOnPreparedListener(mp -> {
-                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                callSound = true;
-            });
-            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
-                return false;
-            });
-            mediaPlayer.setOnCompletionListener(mp -> {
-                Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show();
-                isComplete = true;
-                loopMedia();
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+            url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + currentPosition + ".mp3";
+            try {
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.prepare();
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                    callSound = true;
+                });
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
+                    return false;
+                });
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    Toast.makeText(getApplicationContext(), "Completed", Toast.LENGTH_SHORT).show();
+                    isComplete = true;
+                    loopMedia();
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         ivPlay.setOnClickListener(v -> {
@@ -90,10 +93,9 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.pause();
         });
 
-        ivClose.setOnClickListener(v -> {
+        ivStop.setOnClickListener(v -> {
             mediaPlayer.stop();
             mediaPlayer.prepareAsync();
-//            finish();
         });
 
         ivNext15.setOnClickListener(v -> {
@@ -136,19 +138,19 @@ public class MainActivity extends AppCompatActivity {
             playMedia();
         });
 
-        ivLoop.setOnClickListener(v -> {
+        ivLoopOne.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Loop One", Toast.LENGTH_SHORT).show();
             checkLoop = LOOP_ONE;
             mediaPlayer.setLooping(true);
         });
 
-        ivStopRepeat.setOnClickListener(v -> {
+        ivStopLoop.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Stop Loop", Toast.LENGTH_SHORT).show();
             checkLoop = STOP_LOOP;
             mediaPlayer.setLooping(false);
         });
 
-        ivRepeat.setOnClickListener(v -> {
+        ivLoopAll.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Loop All", Toast.LENGTH_SHORT).show();
             checkLoop = LOOP_ALL;
             mediaPlayer.setLooping(false);
@@ -158,6 +160,12 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Set Speed 2x", Toast.LENGTH_SHORT).show();
             float speed = 2.0f;
             mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+        });
+
+        ivPlayService.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, PlayServiceActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 

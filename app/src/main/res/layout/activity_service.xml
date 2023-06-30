@@ -12,7 +12,7 @@
         android:id="@+id/ivCover"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        tools:src="@tools:sample/avatars" />
+        tools:src="@tools:sample/backgrounds/scenic" />
 
     <SeekBar
         android:id="@+id/seekBar"
@@ -36,7 +36,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:background="#FF0000"
+        android:background="#B34C2C"
         android:gravity="center">
 
         <ImageView
@@ -92,7 +92,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:background="#FF9800"
+        android:background="#CDDC39"
         android:gravity="center">
 
         <ImageView
@@ -144,14 +144,5 @@
         android:textSize="20sp"
         android:textStyle="bold"
         tools:text="Tổng" />
-
-    <ImageView
-        android:id="@+id/ivPlayService"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="10dp"
-        app:srcCompat="@drawable/ic_play_service" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
