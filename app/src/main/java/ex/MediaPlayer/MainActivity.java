@@ -85,7 +85,8 @@ public class MainActivity extends AppCompatActivity {
 
         ivPlay.setOnClickListener(v -> {
             Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
-            playMedia();
+            mediaPlayer.start();
+            checkTime();
         });
 
         ivPause.setOnClickListener(v -> {
@@ -163,10 +164,18 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ivPlayService.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Play Service", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(MainActivity.this, PlayServiceActivity.class);
             startActivity(intent);
             finish();
         });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mediaPlayer.stop();
+        mediaPlayer.prepareAsync();
     }
 
     private void playNextBack() {

@@ -1,19 +1,42 @@
 package ex.MediaPlayer;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.concurrent.TimeUnit;
 
 public class PlayServiceActivity extends AppCompatActivity {
     ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop;
     SeekBar seekBar;
     TextView tvCurrent, tvAll;
-    
+
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @SuppressLint("DefaultLocale")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(context, "Broadcast Receiver", Toast.LENGTH_SHORT).show();
+            double startTime = intent.getExtras().getDouble("startTime");
+            double finalTime = intent.getExtras().getDouble("finalTime");
+            Log.d("receive", "0: " + startTime);
+            Log.d("receive", "1: " + finalTime);
+            tvCurrent.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime), TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) startTime))));
+            tvAll.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) finalTime), TimeUnit.MILLISECONDS.toSeconds((long) finalTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) finalTime))));
+            seekBar.setProgress((int) startTime);
+            seekBar.setMax((int) finalTime);
+        }
+    };
+
     @SuppressLint({"MissingInflatedId", "DefaultLocale"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,5 +116,18 @@ public class PlayServiceActivity extends AppCompatActivity {
             intent.putExtra("playService", "speed");
             startService(intent);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter("broadcast");
+        registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mBroadcastReceiver);
     }
 }

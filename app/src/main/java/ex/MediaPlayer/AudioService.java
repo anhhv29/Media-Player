@@ -30,7 +30,7 @@ public class AudioService extends Service {
     final int LOOP_ONE = 1;
     final int LOOP_ALL = 2;
     final int STOP_LOOP = 3;
-
+    Intent i = new Intent("broadcast");
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,7 +68,9 @@ public class AudioService extends Service {
         switch (actionService) {
             case "play":
                 Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
-                playMedia();
+//                playMedia();
+                mediaPlayer.start();
+                checkTime();
                 break;
             case "pause":
                 Toast.makeText(getApplicationContext(), "Pause sound", Toast.LENGTH_SHORT).show();
@@ -140,8 +142,6 @@ public class AudioService extends Service {
                 mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
                 break;
             default:
-                mediaPlayer.stop();
-                mediaPlayer.prepareAsync();
                 break;
         }
         return START_NOT_STICKY;
@@ -186,13 +186,14 @@ public class AudioService extends Service {
         startTime = mediaPlayer.getCurrentPosition();
         if (oneTimeOnly == 0) {
             Log.d("check0", "0: " + finalTime);
-//            seekBar.setMax((int) finalTime);
+            i.putExtra("finalTime", finalTime);
+            sendBroadcast(i);
             oneTimeOnly = 1;
         }
-//        tvCurrent.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime), TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) startTime))));
-//        tvAll.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) finalTime), TimeUnit.MILLISECONDS.toSeconds((long) finalTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) finalTime))));
+        i.putExtra("finalTime", finalTime);
+        i.putExtra("startTime", startTime);
+        sendBroadcast(i);
         Log.d("check1", "1: " + startTime);
-//        seekBar.setProgress((int) startTime);
         myHandler.postDelayed(UpdateSongTime, 1000);
     }
 
@@ -200,9 +201,9 @@ public class AudioService extends Service {
         @SuppressLint("DefaultLocale")
         public void run() {
             startTime = mediaPlayer.getCurrentPosition();
-//            tvCurrent.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes((long) startTime), TimeUnit.MILLISECONDS.toSeconds((long) startTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long) startTime))));
+            i.putExtra("startTime", startTime);
+            sendBroadcast(i);
             Log.d("check", "2: " + startTime);
-//            seekBar.setProgress((int) startTime);
             myHandler.postDelayed(this, 1000);
         }
     };
