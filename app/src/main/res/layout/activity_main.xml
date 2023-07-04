@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center|top"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/ivCover"
@@ -145,13 +144,37 @@
         android:textStyle="bold"
         tools:text="Tổng" />
 
-    <ImageView
-        android:id="@+id/ivPlayService"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="10dp"
-        app:srcCompat="@drawable/ic_play_service" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/ivPlayService"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_play_service" />
+
+        <ImageView
+            android:id="@+id/ivBubble"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_bubble" />
+
+        <ImageView
+            android:id="@+id/ivPiP"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_pip" />
+    </LinearLayout>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

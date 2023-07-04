@@ -1,23 +1,39 @@
-package ex.MediaPlayer;
+package ex.media_player;
+
+import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import ex.MediaPlayer.R;
+import ex.media_player.bubbles.BubbleLayout;
+import ex.media_player.bubbles.BubblesManager;
+import ex.media_player.bubbles.OnInitializedCallback;
+
 public class MainActivity extends AppCompatActivity {
-    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop, ivPlayService;
+    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 0;
+    public static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
+    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop, ivPlayService, ivBubble, ivPip;
     SeekBar seekBar;
     TextView tvCurrent, tvAll;
     double startTime = 0;
@@ -58,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
         tvCurrent = findViewById(R.id.tvCurrent);
         tvAll = findViewById(R.id.tvAll);
         ivPlayService = findViewById(R.id.ivPlayService);
+        ivBubble = findViewById(R.id.ivBubble);
+        ivPip = findViewById(R.id.ivPiP);
 
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
@@ -169,6 +187,15 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        ivBubble.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Bubble", Toast.LENGTH_SHORT).show();
+            if (isLayoutOverlayPermissionGranted(MainActivity.this)) {
+                initializeBubblesManager();
+            } else {
+                grantLayoutOverlayPermission(MainActivity.this);
+            }
+        });
     }
 
     @Override
@@ -252,6 +279,69 @@ public class MainActivity extends AppCompatActivity {
                 playNextBack();
                 playMedia();
                 break;
+        }
+    }
+
+    private BubblesManager bubblesManager = null;
+
+    private void initializeBubblesManager() {
+        if (bubblesManager != null) {
+            bubblesManager.recycle();
+        }
+
+        bubblesManager = new BubblesManager.Builder(MyApp.appContext)
+                .setTrashLayout(R.layout.bubble_trash)
+                .setInitializationCallback(this::addNewBubble)
+                .build();
+        bubblesManager.initialize();
+    }
+
+    private void addNewBubble() {
+        @SuppressLint("InflateParams") BubbleLayout bubbleView = (BubbleLayout) LayoutInflater.from(MainActivity.this)
+                .inflate(R.layout.bubble_media, null);
+
+        bubbleView.setShouldStickToWall(true);
+        bubblesManager.addBubble(bubbleView, 60, 60);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // permission was granted, yay! Do the
+                // contacts-related task you need to do.
+            } else {
+
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+                Toast.makeText(MainActivity.this, "Vui lòng cấp quyền vị trí đế sử dụng ứng dụng", Toast.LENGTH_SHORT).show();
+                startActivity(
+                        new Intent(
+                                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.fromParts("package", getPackageName(), null)
+                        )
+                );
+            }
+        }
+    }
+
+    private boolean isLayoutOverlayPermissionGranted(Activity activity) {
+        Log.v(TAG, "Granting Layout Overlay Permission..");
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(activity)) {
+            Log.v(TAG, "Permission is denied");
+            return false;
+        } else {
+            Log.v(TAG, "Permission is granted");
+            return true;
+        }
+    }
+
+    private void grantLayoutOverlayPermission(Activity activity) {
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(activity)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + activity.getPackageName()));
+            activity.startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION);
         }
     }
 }

@@ -1,4 +1,4 @@
-package ex.MediaPlayer;
+package ex.media_player;
 
 import android.content.Context;
 

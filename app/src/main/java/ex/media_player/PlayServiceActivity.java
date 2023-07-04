@@ -1,4 +1,4 @@
-package ex.MediaPlayer;
+package ex.media_player;
 
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -15,6 +15,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.concurrent.TimeUnit;
+
+import ex.MediaPlayer.R;
 
 public class PlayServiceActivity extends AppCompatActivity {
     ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop;
@@ -79,7 +81,6 @@ public class PlayServiceActivity extends AppCompatActivity {
         ivNext15.setOnClickListener(v -> {
             intent.putExtra("playService", "next15");
             startService(intent);
-
         });
 
         ivBack15.setOnClickListener(v -> {

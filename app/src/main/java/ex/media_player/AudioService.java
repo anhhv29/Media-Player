@@ -1,4 +1,4 @@
-package ex.MediaPlayer;
+package ex.media_player;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -12,6 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
+
+import ex.media_player.bubbles.BubblesService;
 
 public class AudioService extends Service {
     MediaPlayer mediaPlayer;
@@ -31,6 +33,8 @@ public class AudioService extends Service {
     final int LOOP_ALL = 2;
     final int STOP_LOOP = 3;
     Intent i = new Intent("broadcast");
+    Intent s = new Intent(AudioService.this, BubblesService.class);
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -38,7 +42,6 @@ public class AudioService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
             url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + currentPosition + ".mp3";
@@ -68,7 +71,6 @@ public class AudioService extends Service {
         switch (actionService) {
             case "play":
                 Toast.makeText(getApplicationContext(), "Playing sound", Toast.LENGTH_SHORT).show();
-//                playMedia();
                 mediaPlayer.start();
                 checkTime();
                 break;
@@ -188,11 +190,16 @@ public class AudioService extends Service {
             Log.d("check0", "0: " + finalTime);
             i.putExtra("finalTime", finalTime);
             sendBroadcast(i);
+            s.putExtra("finalTime", finalTime);
+            startService(s);
             oneTimeOnly = 1;
         }
         i.putExtra("finalTime", finalTime);
         i.putExtra("startTime", startTime);
         sendBroadcast(i);
+        s.putExtra("finalTime", finalTime);
+        s.putExtra("startTime", startTime);
+        startService(s);
         Log.d("check1", "1: " + startTime);
         myHandler.postDelayed(UpdateSongTime, 1000);
     }
@@ -203,6 +210,8 @@ public class AudioService extends Service {
             startTime = mediaPlayer.getCurrentPosition();
             i.putExtra("startTime", startTime);
             sendBroadcast(i);
+            s.putExtra("startTime", startTime);
+            startService(s);
             Log.d("check", "2: " + startTime);
             myHandler.postDelayed(this, 1000);
         }
