@@ -4,8 +4,12 @@ import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -13,7 +17,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Rational;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -21,18 +27,20 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import ex.MediaPlayer.R;
 import ex.media_player.bubbles.BubbleLayout;
 import ex.media_player.bubbles.BubblesManager;
-import ex.media_player.bubbles.OnInitializedCallback;
 
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 0;
     public static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
+    LinearLayoutCompat ivMain;
     ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop, ivPlayService, ivBubble, ivPip;
     SeekBar seekBar;
     TextView tvCurrent, tvAll;
@@ -58,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ivMain = findViewById(R.id.ivMain);
         ivCover = findViewById(R.id.ivCover);
         ivSkipPrev = findViewById(R.id.ivSkipPrev);
         ivBack15 = findViewById(R.id.ivBack15);
@@ -196,6 +205,8 @@ public class MainActivity extends AppCompatActivity {
                 grantLayoutOverlayPermission(MainActivity.this);
             }
         });
+
+        ivPip.setOnClickListener(v -> enterPipMode());
     }
 
     @Override
@@ -203,6 +214,39 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         mediaPlayer.stop();
         mediaPlayer.prepareAsync();
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        enterPipMode();
+    }
+
+    private void enterPipMode() {
+        ArrayList<RemoteAction> actions = new ArrayList<>();
+        Icon icon = Icon.createWithResource(MainActivity.this, android.R.drawable.ic_menu_info_details);
+        String title = "Info";
+        String subtitle = "Info Details";
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"));
+        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, PendingIntent.FLAG_MUTABLE);
+        RemoteAction remoteAction = new RemoteAction(icon, title, subtitle, pendingIntent);
+        actions.add(remoteAction);
+        Rational aspectRatio = new Rational(9, 16);
+        PictureInPictureParams params = new PictureInPictureParams.Builder()
+                .setAspectRatio(aspectRatio)
+                .setActions(actions)
+                .build();
+        enterPictureInPictureMode(params);
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        if (isInPictureInPictureMode) {
+            //hide all unimportant views
+            ivMain.setVisibility(View.GONE);
+        } else {
+            ivMain.setVisibility(View.VISIBLE);
+        }
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     private void playNextBack() {
