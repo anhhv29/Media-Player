@@ -36,22 +36,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="ex.media_player.PlayServiceActivity"
-            android:exported="true" />
-
-        <service
-            android:name="ex.media_player.AudioService"
-            android:enabled="true"
-            android:exported="false"
-            android:stopWithTask="false" />
-
-        <service
-            android:name="ex.media_player.bubbles.BubblesService"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.SYSTEM_ALERT_WINDOW"
-            android:stopWithTask="false" />
     </application>
 </manifest>

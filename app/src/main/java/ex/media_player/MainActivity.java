@@ -1,47 +1,26 @@
 package ex.media_player;
 
-import static android.content.ContentValues.TAG;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.app.PictureInPictureParams;
-import android.app.RemoteAction;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Icon;
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
-import android.util.Rational;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import ex.MediaPlayer.R;
-import ex.media_player.bubbles.BubbleLayout;
-import ex.media_player.bubbles.BubblesManager;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_LOCATION = 0;
-    public static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
     LinearLayoutCompat ivMain;
-    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop, ivPlayService, ivBubble, ivPip;
+    ImageView ivCover, ivSkipPrev, ivBack15, ivPlay, ivPause, ivNext15, ivSkipNext, ivSpeed, ivLoopOne, ivLoopAll, ivStopLoop, ivStop;
     SeekBar seekBar;
     TextView tvCurrent, tvAll;
     double startTime = 0;
@@ -82,9 +61,6 @@ public class MainActivity extends AppCompatActivity {
         seekBar = findViewById(R.id.seekBar);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvAll = findViewById(R.id.tvAll);
-        ivPlayService = findViewById(R.id.ivPlayService);
-        ivBubble = findViewById(R.id.ivBubble);
-        ivPip = findViewById(R.id.ivPiP);
 
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
@@ -189,24 +165,6 @@ public class MainActivity extends AppCompatActivity {
             float speed = 2.0f;
             mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
         });
-
-        ivPlayService.setOnClickListener(v -> {
-            Toast.makeText(getApplicationContext(), "Play Service", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(MainActivity.this, PlayServiceActivity.class);
-            startActivity(intent);
-            finish();
-        });
-
-        ivBubble.setOnClickListener(v -> {
-            Toast.makeText(getApplicationContext(), "Bubble", Toast.LENGTH_SHORT).show();
-            if (isLayoutOverlayPermissionGranted(MainActivity.this)) {
-                initializeBubblesManager();
-            } else {
-                grantLayoutOverlayPermission(MainActivity.this);
-            }
-        });
-
-        ivPip.setOnClickListener(v -> enterPipMode());
     }
 
     @Override
@@ -214,39 +172,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         mediaPlayer.stop();
         mediaPlayer.prepareAsync();
-    }
-
-    @Override
-    protected void onUserLeaveHint() {
-        enterPipMode();
-    }
-
-    private void enterPipMode() {
-        ArrayList<RemoteAction> actions = new ArrayList<>();
-        Icon icon = Icon.createWithResource(MainActivity.this, android.R.drawable.ic_menu_info_details);
-        String title = "Info";
-        String subtitle = "Info Details";
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"));
-        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, PendingIntent.FLAG_MUTABLE);
-        RemoteAction remoteAction = new RemoteAction(icon, title, subtitle, pendingIntent);
-        actions.add(remoteAction);
-        Rational aspectRatio = new Rational(9, 16);
-        PictureInPictureParams params = new PictureInPictureParams.Builder()
-                .setAspectRatio(aspectRatio)
-                .setActions(actions)
-                .build();
-        enterPictureInPictureMode(params);
-    }
-
-    @Override
-    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
-        if (isInPictureInPictureMode) {
-            //hide all unimportant views
-            ivMain.setVisibility(View.GONE);
-        } else {
-            ivMain.setVisibility(View.VISIBLE);
-        }
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     private void playNextBack() {
@@ -323,69 +248,6 @@ public class MainActivity extends AppCompatActivity {
                 playNextBack();
                 playMedia();
                 break;
-        }
-    }
-
-    private BubblesManager bubblesManager = null;
-
-    private void initializeBubblesManager() {
-        if (bubblesManager != null) {
-            bubblesManager.recycle();
-        }
-
-        bubblesManager = new BubblesManager.Builder(MyApp.appContext)
-                .setTrashLayout(R.layout.bubble_trash)
-                .setInitializationCallback(this::addNewBubble)
-                .build();
-        bubblesManager.initialize();
-    }
-
-    private void addNewBubble() {
-        @SuppressLint("InflateParams") BubbleLayout bubbleView = (BubbleLayout) LayoutInflater.from(MainActivity.this)
-                .inflate(R.layout.bubble_media, null);
-
-        bubbleView.setShouldStickToWall(true);
-        bubblesManager.addBubble(bubbleView, 60, 60);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // permission was granted, yay! Do the
-                // contacts-related task you need to do.
-            } else {
-
-                // permission denied, boo! Disable the
-                // functionality that depends on this permission.
-                Toast.makeText(MainActivity.this, "Vui lòng cấp quyền vị trí đế sử dụng ứng dụng", Toast.LENGTH_SHORT).show();
-                startActivity(
-                        new Intent(
-                                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                Uri.fromParts("package", getPackageName(), null)
-                        )
-                );
-            }
-        }
-    }
-
-    private boolean isLayoutOverlayPermissionGranted(Activity activity) {
-        Log.v(TAG, "Granting Layout Overlay Permission..");
-        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(activity)) {
-            Log.v(TAG, "Permission is denied");
-            return false;
-        } else {
-            Log.v(TAG, "Permission is granted");
-            return true;
-        }
-    }
-
-    private void grantLayoutOverlayPermission(Activity activity) {
-        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(activity)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + activity.getPackageName()));
-            activity.startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION);
         }
     }
 }
